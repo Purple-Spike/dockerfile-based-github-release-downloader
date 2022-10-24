@@ -3,7 +3,7 @@
 # asset PublicApi.zip
 # access token 
 
-# pwsh ./script.ps1 -githubAccessToken "" releaseTagId 3200335278 -assetName "PublicApi.zip" -githubUri "https://github.com/Purple-Spike/public-web-app"
+# pwsh ./script.ps1 -githubAccessToken "" -releaseTagId 3200335278 -assetName "PublicApi.zip" -githubUri "https://github.com/Purple-Spike/public-web-app"
 
 param (
     [string]$githubAccessToken,
@@ -34,10 +34,19 @@ if ([string]::IsNullOrWhiteSpace($assetName)) {
     throw 'Asset Name is required'
 }
 
-$downloadedFilePath = "./downloads/" + $assetName 
-$extractedPath = "./extracted"
+$downloadedDir = "./downloads"
+$extractedDir = "./extracted"
 
-#Set-GitHubConfiguration -DisableTelemetry
+if (Test-Path $downloadedDir) {
+    Remove-Item $downloadedDir -Force -Recurse
+}
+
+if (Test-Path $extractedDir) {
+    Remove-Item $extractedDir -Force -Recurse
+}
+
+New-Item -Path $downloadedDir -ItemType Directory
+New-Item -Path $extractedDir -ItemType Directory
 
 $release = Get-GitHubRelease -Uri $githubUri -Tag $releaseTagId
 
@@ -45,10 +54,7 @@ $assets = $release | Get-GitHubReleaseAsset
 
 $selectedAsset = $assets | Where-Object -Property "name" -Match -Value $assetName
 
-Write-Host $selectedAsset
+$downloadedAsset = $selectedAsset | Get-GitHubReleaseAsset -Path $downloadedDir -Force
 
-# # Download the asset
-# Get-GitHubReleaseAsset -Uri $githubUri -Release $releaseId -Asset $assetName -Path $downloadedFilePath
-
-# # Extract the asset to a known directory
-# Expand-Archive -Path $downloadedFilePath -DestinationPath $extractedPath
+# Extract the asset to a known directory
+Expand-Archive -Path $downloadedAsset -DestinationPath $extractedDir

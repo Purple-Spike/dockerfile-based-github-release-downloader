@@ -277,8 +277,9 @@ __pycache__/
 **/UnitTests/**/coverage.json
 **/UnitTests/**/coverage.cobertura.xml
 
-**/Devices/**/build
-
 !**/[Cc]omponents/[Dd]ebug
 
 src/DockerSecrets
+
+/downloads
+/extracted
