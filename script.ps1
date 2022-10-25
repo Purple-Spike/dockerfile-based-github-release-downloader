@@ -5,6 +5,8 @@ param (
     [string]$assetName
 )
 
+Write-Host "Starting..."
+
 if ($releaseTagId -lt 1) {
     throw 'Release Id is required'
 }
@@ -18,12 +20,16 @@ if ([string]::IsNullOrWhiteSpace($githubAccessToken)) {
     throw 'GitHub Access Token is required'
 }
 
+Write-Host "Installing PowerShell for GitHub module"
 Install-Module -Name PowerShellForGitHub -AcceptLicense -Force
 
+Write-Host "Setting Up GitHub Authentication"
 $githubAccessTokenSecure = ($githubAccessToken | ConvertTo-SecureString -AsPlainText -Force)
 
 $githubCreds = New-Object System.Management.Automation.PSCredential "username is ignored", $githubAccessTokenSecure
 Set-GitHubAuthentication -Credential $githubCreds
+
+Write-Host "Authentication Setup"
 
 #clear these out now that they're no longer needed
 $githubAccessTokenSecure = $null
@@ -44,13 +50,13 @@ if (Test-Path $extractedDir) {
 New-Item -Path $downloadedDir -ItemType Directory
 New-Item -Path $extractedDir -ItemType Directory
 
-Write-Debug "Loading GitHub Release from URI $githubUri and Tag $releaseTagId"
+Write-Host "Loading GitHub Release from URI $githubUri and Tag $releaseTagId"
 
 $release = Get-GitHubRelease -Uri $githubUri -Tag $releaseTagId
 
 $assets = $release | Get-GitHubReleaseAsset 
 
-Write-Debug "Loading release asset named $assetName"
+Write-Host "Loading release asset named $assetName"
 
 $selectedAsset = $assets | Where-Object -Property "name" -Match -Value $assetName
 
