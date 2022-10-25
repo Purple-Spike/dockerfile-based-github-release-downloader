@@ -2,7 +2,8 @@ param (
     [string]$githubAccessToken,
     [string]$githubUri,
     [Int64]$releaseTagId,
-    [string]$assetName
+    [string]$assetName,
+    [string]$extraFilesBase64
 )
 
 Write-Host "Starting..."
@@ -58,8 +59,29 @@ $assets = $release | Get-GitHubReleaseAsset
 Write-Host "Loading release asset named $assetName"
 
 $selectedAsset = $assets | Where-Object -Property "name" -Match -Value $assetName
-
 $downloadedAsset = $selectedAsset | Get-GitHubReleaseAsset -Path $downloadedDir -Force
 
 # Extract the asset to a known directory
 Expand-Archive -Path $downloadedAsset -DestinationPath $extractedDir
+
+if (-not [string]::IsNullOrWhiteSpace($extraFilesBase64)) {
+    $extraFilesJson = [System.Text.Encoding]::ASCII.GetString([System.Convert]::FromBase64String($extraFilesBase64))
+
+    $extraFilesObj = $extraFilesJson | ConvertFrom-Json
+    Write-Host "Creating extra files: $extraFilesObj"
+    foreach ($extraFile in $extraFilesObj) {
+        $outputContent = [System.Convert]::FromBase64String($extraFile.Base64Content)
+
+        if ($extraFile.Type -eq "STRING") {
+            $outputContent = [System.Text.Encoding]::ASCII.GetString($outputContent)
+            Write-Host "Outputting STRING content: $outputContent"
+        }
+
+        $outputFileName = "$extractedDir/wwwroot/$($extraFile.FileName)";
+        Write-Host "Writing Extra File: $outputFileName"
+        Out-File -FilePath $outputFileName -InputObject $outputContent -Force
+    }
+}
+else {
+    Write-Host "No extra files to create"
+}
