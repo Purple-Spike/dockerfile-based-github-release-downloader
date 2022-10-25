@@ -77,7 +77,7 @@ if (-not [string]::IsNullOrWhiteSpace($extraFilesBase64)) {
             Write-Host "Outputting STRING content: $outputContent"
         }
 
-        $outputFileName = "$extractedDir/wwwroot/$($extraFile.FileName)";
+        $outputFileName = "$extractedDir/$($extraFile.FileName)";
         Write-Host "Writing Extra File: $outputFileName"
         Out-File -FilePath $outputFileName -InputObject $outputContent -Force
     }
