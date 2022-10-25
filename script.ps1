@@ -44,9 +44,13 @@ if (Test-Path $extractedDir) {
 New-Item -Path $downloadedDir -ItemType Directory
 New-Item -Path $extractedDir -ItemType Directory
 
+Write-Debug "Loading GitHub Release from URI $githubUri and Tag $releaseTagId"
+
 $release = Get-GitHubRelease -Uri $githubUri -Tag $releaseTagId
 
 $assets = $release | Get-GitHubReleaseAsset 
+
+Write-Debug "Loading release asset named $assetName"
 
 $selectedAsset = $assets | Where-Object -Property "name" -Match -Value $assetName
 
