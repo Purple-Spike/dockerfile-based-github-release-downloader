@@ -25,7 +25,6 @@ Install-Module -Name PowerShellForGitHub -AcceptLicense -Force
 
 Write-Host "Setting Up GitHub Authentication"
 $githubAccessTokenSecure = ($githubAccessToken | ConvertTo-SecureString -AsPlainText -Force)
-
 $githubCreds = New-Object System.Management.Automation.PSCredential "username is ignored", $githubAccessTokenSecure
 Set-GitHubAuthentication -Credential $githubCreds
 
